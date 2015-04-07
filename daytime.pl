@@ -12,12 +12,13 @@ use constant IPPROTO_TCP => 6;
 my $address = shift || DEFAULT_ADDR;
 my $packed_addr = inet_aton($address);
 my $destination = sockaddr_in(PORT, $packed_addr);
+my $socket;
 
-socket(SOCK, PF_INET, SOCK_STREAM, IPPROTO_TCP) or
+socket($socket, PF_INET, SOCK_STREAM, IPPROTO_TCP) or
 	die "Can't make socket: $!\n\n";
-connect(SOCK, $destination) or
+connect($socket, $destination) or
 	die "Can't connect: $!\n\n";
 
 print "Daytime client\n";
-print <SOCK>;
+print <$socket>;
 1;
