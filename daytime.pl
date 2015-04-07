@@ -5,7 +5,7 @@ use warnings;
 
 use Socket;
 
-use constant DEFAULT_ADDR => '173.246.105.50';
+use constant DEFAULT_ADDR => '127.0.0.1';
 use constant PORT => 13;
 use constant IPPROTO_TCP => 6;
 
