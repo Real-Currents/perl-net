@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Socket qw{AF_INET};
+use Socket qw{inet_ntoa};
 
 my( $ip, $packed );
 $ip = '192.168.2.2';
@@ -23,13 +24,15 @@ $packed = pack 'C*', $a, $b, $c, $d;		# Pack as many unsiged bytes as needed
 print "packed: ". unpack('H*', $packed) ."\n";			# Print hexadecimal representation of $packed
 
 ( $a, $b, $c, $d ) = unpack 'C4', $packed;
-print( $ip ."\n") if( $ip eq join '.', $a, $b, $c, $d );
+print "unpacked by inet_ntoa: ". inet_ntoa($packed) ."\n\n";
 
 $ip = gethostbyname('localhost');
-print "packed by gethostbyname: ". unpack('H*', $packed) ."\n";	
+print "localhost\n";
+print "packed by gethostbyname: ". unpack('H*', $ip) ."\n";	
+print "unpacked by inet_ntoa: ". inet_ntoa($ip) ."\n";
 my( $name, 
 	$aliases, 
 	$family, 
 	$len, 
 	$packed_addr )= 	gethostbyaddr $ip, AF_INET;
-print "Name: $name, Aliases: $aliases, Net-Family: $family and Length: $len from gethostbyaddr\n";
+print "Name: $name, Aliases: $aliases, Net-Family: $family and Length: $len from gethostbyaddr\n\n";

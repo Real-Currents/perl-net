@@ -18,21 +18,40 @@ print "Daytime client \
 ===============================================================\n";
 # Important functions
 #
+# ... return scaler context...
 # $packed_addr= 		gethostbyname $name
+# ... return list context...
 # ( $name, 
 #	$aliases, 
 #	$family,
 #	$len,
 #	$packed_addr )= 	gethostbyname $name
 #
+# ... return scaler context...
 # $name= 				gethostbyaddr $packed_addr, $family
+# ... return list context...
 # ( $name, 
 #	$aliases, 
 #	$family,
 #	$len,
 #	$packed_addr )= 	gethostbyaddr $packed_addr, $family
-# 
-# From Socket:
+#
+# ... return scaler context...
+# $number=				getprotobyname $protocol_name
+# ... return list context...
+# ( $protocol_name,
+#	$aliases,
+#	$number )=			getprotobyname $protocol_name
+#
+# ... return scaler context...
+# $protocol_name=		getprotobynumber $protocol_number
+# ... return list context...
+# ( $protocol_name,
+#	$aliases,
+#	$number )=			getprotobynumber $protocol_number
+#
+#
+# use Socket;
 #
 # $packed_addr= 		inet_aton $dotted_quad
 # $dotted_quad=			inet_ntoa $packed_address
@@ -40,6 +59,8 @@ print "Daytime client \
 # ($port, $packed_addr)= sockaddr_in $socket_addr
 # $socket_addr= 		pack_sockaddr_in $port, $packed_addr
 # ($port, $packed_addr)= unpack_sockaddr_in $socket_addr
+
+my $protocol = getprotobyname('tcp') || IPPROTO_TCP;
 
 while( my $address = shift ) {
 	my $packed_addr = inet_aton($address); #gethostbyname($address);	
@@ -53,7 +74,7 @@ while( my $address = shift ) {
 	}
 	
 	my $socket;
-	socket($socket, AF_INET, SOCK_STREAM, IPPROTO_TCP) or 	# ($handle, $family, $type, $protocol_num)
+	socket($socket, AF_INET, SOCK_STREAM, $protocol) or 	# ($handle, $family, $type, $protocol_num)
 		print "Can't make socket: $!\n\n" and next;
 	
 	my $destination = sockaddr_in(PORT, $packed_addr);
