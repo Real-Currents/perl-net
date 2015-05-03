@@ -3,7 +3,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Socket qw{AF_INET};
+use Socket qw(AF_INET);
 
 while( my $address = shift ) {
 	my $packed_addr = gethostbyname $address;	

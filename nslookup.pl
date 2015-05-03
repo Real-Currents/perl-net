@@ -3,7 +3,7 @@ use 5.10.1;
 use strict;
 use warnings;
 
-use Socket qw{AF_INET inet_aton inet_ntoa};
+use Socket qw(AF_INET inet_aton inet_ntoa);
 
 while( my $address = shift ) {
 	my $packed_addr = inet_aton $address;	
