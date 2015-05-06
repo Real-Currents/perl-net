@@ -4,12 +4,13 @@ use strict;
 use warnings;
 
 use Socket;
-use IO::File;
 use IO::Handle;
 use constant MY_ECHO_PORT => 3000;
 use constant MY_ADDRESS => '127.0.0.1';
 
-my $socket = new IO::File;
+print "PID=". $$ ."\n";
+
+my $socket = new IO::Handle;
 
 my( $bytes_out, 
 	$bytes_in) = (0, 0);
