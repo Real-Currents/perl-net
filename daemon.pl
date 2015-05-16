@@ -8,29 +8,46 @@ use File::Monitor;
 use IO::Handle;
 
 sub stopDaemon();
+sub startProc();
+sub stopProc();
 
 my $pid;
 my $proc = shift;
-my $in = new IO::Handle;
 
-$SIG{CHLD} = "IGNORE";
+#$SIG{CHLD} = "IGNORE";
 $SIG{'INT'} = \&stopDaemon;
-
-print "PID=". $$ ."\n";
+$SIG{'KILL'} = \&stopProc;
 
 print "Start watching...\n";
 
-$in->autoflush();
-$pid = fork and do $proc; 
+$pid = fork();
+if( $pid > 0 ) {
+	# This is the parent (daemon) process
+	print "daemon PID=". $$ ."\n";
+} else {
+	# This is the child (forked) process
+	print "forked PID=". $$ ."\n";
+}
+startProc;
+
+while (<>) {
+	STDIN->print( $. ."\n" );
+	STDIN->flush();
+}
+
+sub startProc() {
+	do $proc if( $pid > 0);
+}
+
+sub stopProc() {
+	unless( defined $pid ){
+		"Child process has stopped\n\n";
+	}
+}
 
 sub stopDaemon() { 
 	print "Stop watching.\n";
-	#kill 2, $pid;
 	exit 2 or die "$!\n";
-};
-
-while (<>) {
-	print $. ".\n";
 }
 
-stopDaemon;
+1;

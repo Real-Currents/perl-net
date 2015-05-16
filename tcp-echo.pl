@@ -8,8 +8,6 @@ use IO::Handle;
 use constant MY_ECHO_PORT => 3000;
 use constant MY_ADDRESS => '127.0.0.1';
 
-print "PID=". $$ ."\n";
-
 my $socket = new IO::Handle;
 
 my( $bytes_out, 
@@ -29,31 +27,33 @@ setsockopt $socket, SOL_SOCKET, SO_REUSEADDR, 1  or die "$!\n";
 
 my $server_addr = sockaddr_in $port, (INADDR_ANY or inet_aton MY_ADDRESS);
 
-warn "Waiting for incoming connections on port $port...\n" if(
+print "Waiting for incoming connections on port $port...\n" if(
 		bind($socket, $server_addr) &&
 		listen($socket, SOMAXCONN) 
 	) or die "$!\n";
 
 while (1) {
-	my $session = new IO::File;
+	my $session = new IO::Handle;
 	next unless my $client_addr = accept $session, $socket ;
 	my( $port,
 		$packed_client_addr ) = sockaddr_in $client_addr;
 	warn "Connection from [". inet_ntoa($packed_client_addr) .", $port]\n";
 	
-	print $session "Welcome to the echo server!";
+	$session->print("Welcome to the echo server!\n\n") 
+		and $session->flush();
 	
 	# Process client input here
 	while (<$session>) {
 		$bytes_in += length $_;
-		chomp $_;
+		#chomp $_;
 		
-		print $session "\nYou said: $_ \n";
+		$session->print("You said: $_ \n\n") 
+			and $session->flush();
 		$bytes_out += length $_;
 		
-		last;
+		#last;
 	}
-	print $session "Come back soon!";
+	print $session "Come back soon!\n\n";
 	
 	warn "Connection from [". inet_ntoa($packed_client_addr) .", $port] closed\n";
 	close $session;
