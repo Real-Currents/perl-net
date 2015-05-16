@@ -7,3 +7,5 @@ print "PID=". $$ ."\n";
 
 my $child = fork();
 die "$!\n" unless( defined $child );
+
+print "Child PID=". $child ."\n" if( $child > 0 );
