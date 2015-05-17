@@ -16,8 +16,8 @@ my( $bytes_out,
 my $port = shift || MY_ECHO_PORT;
 my $protocol = getprotobyname 'tcp';
 
-$SIG{'INT'} = sub {
-	print STDERR "bytes_sent: $bytes_out, bytes_recieved: $bytes_in\n";
+$SIG{'INT'} = $SIG{'KILL'} = $SIG{'TERM'} = sub {
+	print STDERR "\nbytes_sent: $bytes_out, bytes_recieved: $bytes_in\n\n";
 	exit 0;
 };
 
@@ -27,7 +27,7 @@ setsockopt $socket, SOL_SOCKET, SO_REUSEADDR, 1  or die "$!\n";
 
 my $server_addr = sockaddr_in $port, (INADDR_ANY or inet_aton MY_ADDRESS);
 
-print "Waiting for incoming connections on port $port...\n" if(
+warn "Waiting for incoming connections on port $port...\n" if(
 		bind($socket, $server_addr) &&
 		listen($socket, SOMAXCONN) 
 	) or die "$!\n";

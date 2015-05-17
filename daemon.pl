@@ -7,47 +7,47 @@ use warnings;
 use File::Monitor;
 use IO::Handle;
 
-sub stopDaemon();
-sub startProc();
-sub stopProc();
-
 my $pid;
 my $proc = shift;
+
+sub startProc() {
+	do $proc;
+}
+
+sub stopProc() {
+	unless( defined $pid ){
+		warn "Child process has stopped\n\n";
+	}
+}
+
+sub stopDaemon() { 
+	kill 2, $pid and undef $pid;
+	stopProc;
+	warn "Stop watching.\n";
+	exit 2 or die "$!\n";
+}
 
 #$SIG{CHLD} = "IGNORE";
 $SIG{'INT'} = \&stopDaemon;
 $SIG{'KILL'} = \&stopProc;
 
-print "Start watching...\n";
-
+warn "Start watching...\n";
 $pid = fork();
-if( $pid > 0 ) {
-	# This is the parent (daemon) process
-	print "daemon PID=". $$ ."\n";
-} else {
-	# This is the child (forked) process
+
+if(! $pid ) {
+# This is the child (forked) process
 	print "forked PID=". $$ ."\n";
-}
-startProc;
-
-while (<>) {
-	STDIN->print( $. ."\n" );
-	STDIN->flush();
-}
-
-sub startProc() {
-	do $proc if( $pid > 0);
-}
-
-sub stopProc() {
-	unless( defined $pid ){
-		"Child process has stopped\n\n";
+	startProc;
+} else {
+# This is the parent (daemon) process
+	print "daemon PID=". $$ ."\n";
+	# Clear additional command line arguments
+	%ARGV = ();
+	while (<STDIN>) {
+		stopProc;
+		STDOUT->print($. ."\n") if $.;
+		STDOUT->flush();
 	}
-}
-
-sub stopDaemon() { 
-	print "Stop watching.\n";
-	exit 2 or die "$!\n";
 }
 
 1;

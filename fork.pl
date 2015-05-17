@@ -8,4 +8,15 @@ print "PID=". $$ ."\n";
 my $child = fork();
 die "$!\n" unless( defined $child );
 
-print "Child PID=". $child ."\n" if( $child > 0 );
+print "Child process started...\n" if( $child > 0 );
+
+if(! $child ) {
+	# Now in child process
+	print "forked PID=". $$ ."\n";
+	exec( 'ls', '-1');
+}
+
+# Still in parent process;
+print "daemon PID=". $$ ."\n";
+
+while(<>) {} # Will exit on Interrupt, Terminate or Kill
