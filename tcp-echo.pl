@@ -37,7 +37,7 @@ while (1) {
 	next unless my $client_addr = accept $session, $socket ;
 	my( $port,
 		$packed_client_addr ) = sockaddr_in $client_addr;
-	warn "Connection from [". inet_ntoa($packed_client_addr) .", $port]\n";
+	print "Connection from [". inet_ntoa($packed_client_addr) .", $port]\n";
 	
 	$session->print("Welcome to the echo server!\n\n") 
 		and $session->flush();
@@ -46,8 +46,10 @@ while (1) {
 	while (<$session>) {
 		$bytes_in += length $_;
 		#chomp $_;
+		my( $msg ) = $_ =~ /^([\w|\s|\!|\?|\.|\,]+)/;
+		print $msg;
 		
-		$session->print("You said: $_ \n\n") 
+		$session->print("You said: $msg \n\n") 
 			and $session->flush();
 		$bytes_out += length $_;
 		
@@ -55,7 +57,7 @@ while (1) {
 	}
 	print $session "Come back soon!\n\n";
 	
-	warn "Connection from [". inet_ntoa($packed_client_addr) .", $port] closed\n";
+	print "Connection from [". inet_ntoa($packed_client_addr) .", $port] closed\n";
 	close $session;
 }
 

@@ -9,6 +9,10 @@ use IO::Handle;
 
 my $pid;
 my $proc = shift;
+my $in = new IO::Handle;
+my $out = new IO::Handle;
+
+pipe($in, $out);
 
 sub startProc() {
 	do $proc;
@@ -34,16 +38,18 @@ $SIG{'KILL'} = \&stopProc;
 warn "Start watching...\n";
 $pid = fork();
 
-if(! $pid ) {
+if( $pid == 0 ) {
 # This is the child (forked) process
 	print "forked PID=". $$ ."\n";
+	close($in);
 	startProc;
 } else {
 # This is the parent (daemon) process
 	print "daemon PID=". $$ ."\n";
 	# Clear additional command line arguments
 	%ARGV = ();
-	while (<STDIN>) {
+	close($out); 
+	while (<$in>) {
 		stopProc;
 		STDOUT->print($. ."\n") if $.;
 		STDOUT->flush();
