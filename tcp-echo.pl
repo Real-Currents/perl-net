@@ -29,7 +29,7 @@ setsockopt $socket, SOL_SOCKET, SO_REUSEADDR, 1  or die "$!\n";
 
 my $server_addr = sockaddr_in $port, (INADDR_ANY or inet_aton MY_ADDRESS);
 
-warn "Waiting for incoming connections on port $port...\n" if(
+STDERR->print("Waiting for incoming connections on port $port...\n") if(
 		bind($socket, $server_addr) &&
 		listen($socket, SOMAXCONN) 
 	) or die "$!\n";
@@ -42,20 +42,19 @@ while (1) {
 	print "Connection from [". inet_ntoa($packed_client_addr) .", $port]\n";
 	
 	$session->print("Welcome to the echo server!\n\n") 
-		and $session->flush();
+		and $session->flush() or warn "$!\n";
 	
 	# Process client input here
 	while (<$session>) {
 		$bytes_in += length $_;
 		#chomp $_;
 		my( $msg ) = $_ =~ /^([\w|\s|\!|\?|\.|\,]+)/;
-		print $msg;
+		next if(! $msg );
+		STDOUT->print($msg) or warn "$!\n";
 		
 		$session->print("You said: $msg \n\n") 
-			and $session->flush();
+			and $session->flush() or warn "$!\n";
 		$bytes_out += length $_;
-		
-		#last;
 	}
 	print $session "Come back soon!\n\n";
 	
