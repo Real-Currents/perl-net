@@ -19,9 +19,15 @@ sub startProc() {
 }
 
 sub stopProc() {
+	my $sig = shift;
+	warn "Recieved $sig\n" if( $sig );
 	unless( defined $pid ){
 		warn "Child process has stopped\n\n";
+	} elsif( $pid == 0 ) {
+		print "forked PID=". $$ ."\n";
+		startProc;
 	}
+	#exit 2 or die "$!\n";
 }
 
 sub stopDaemon() { 
@@ -31,9 +37,8 @@ sub stopDaemon() {
 	exit 2 or die "$!\n";
 }
 
-#$SIG{CHLD} = "IGNORE";
-$SIG{'INT'} = \&stopDaemon;
-$SIG{'KILL'} = \&stopProc;
+$SIG{INT} = \&stopDaemon;
+$SIG{TERM} = \&stopProc;
 
 warn "Start watching...\n";
 $pid = fork();
@@ -48,7 +53,7 @@ if( $pid == 0 ) {
 	print "daemon PID=". $$ ."\n";
 	# Clear additional command line arguments
 	%ARGV = ();
-	close($out); 
+	#close($out); 
 	while (<$in>) {
 		stopProc;
 		STDOUT->print($. ."\n") if $.;

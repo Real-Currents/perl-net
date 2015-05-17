@@ -16,8 +16,10 @@ my( $bytes_out,
 my $port = shift || MY_ECHO_PORT;
 my $protocol = getprotobyname 'tcp';
 
-$SIG{'INT'} = $SIG{'KILL'} = $SIG{'TERM'} = sub {
-	print STDERR "\nbytes_sent: $bytes_out, bytes_recieved: $bytes_in\n\n";
+$SIG{INT} = sub {
+	my $sig = shift;
+	STDERR->print( "\nTerminated by $sig\n" );
+	STDERR->print( "\nbytes_sent: $bytes_out, bytes_recieved: $bytes_in\n\n" );
 	exit 0;
 };
 
