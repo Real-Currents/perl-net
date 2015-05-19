@@ -19,6 +19,7 @@ sub startDaemon();
 sub startProc();
 sub stopProc($);
 sub stopDaemon($);
+sub fileChange();
 
 $SIG{INT} = \&stopDaemon;
 $SIG{TERM} = \&stopProc;
@@ -32,14 +33,17 @@ sub startDaemon() {
 	warn "Start watching...\n";
 	pipe($in, $out);
 	$watcher->watch( {
+		name        => $proc,
+		recurse     => 1,
+		callback    => {
+			change => \&fileChange
+		}
+	} );
+	$watcher->watch( {
 		name        => getcwd,
 		recurse     => 1,
 		callback    => {
-			change => sub {
-				my ($name, $event, $change) = @_;
-				# Do stuff
-				stopProc 'TERM';
-			}
+			change => \&fileChange
 		}
 	} );
 	$watcher->scan();
@@ -60,8 +64,8 @@ sub startDaemon() {
 			$_ = '';
 			my @changes = $watcher->scan();
 			
-			unless( defined @changes ) {
-				#$in->sysread($_,50,length($_));
+			unless( exists $changes[0] ) {
+				return startDaemon unless $in->sysread($_,50,length($_)); 
 				STDOUT->print($. ."\n") if $.;
 				STDOUT->print($_ ."\n") if $_;
 				STDOUT->flush();
@@ -72,6 +76,7 @@ sub startDaemon() {
 				return startDaemon;
 			}
 		}
+		return startDaemon;
 	}
 }
 
@@ -104,6 +109,12 @@ sub stopDaemon( $ ) {
 		stopProc shift;
 		exit 2 or die "$!\n";
 	}
+}
+
+sub fileChange() {
+	my ($name, $event, $change) = @_;
+	# Do stuff
+	stopProc 'TERM';
 }
 
 1;
