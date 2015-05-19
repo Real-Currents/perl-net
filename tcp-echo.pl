@@ -29,7 +29,7 @@ setsockopt $socket, SOL_SOCKET, SO_REUSEADDR, 1  or die "$!\n";
 
 my $server_addr = sockaddr_in $port, (INADDR_ANY or inet_aton MY_ADDRESS);
 
-STDERR->print("Waiting for incoming connections on port $port...\n") if(
+warn "Waiting for incoming connections on port $port...\n" if(
 		bind($socket, $server_addr) &&
 		listen($socket, SOMAXCONN) 
 	) or die "$!\n";
@@ -48,7 +48,7 @@ while (1) {
 	while (<$session>) {
 		$bytes_in += length $_;
 		#chomp $_;
-		my( $msg ) = $_ =~ /^([\w|\s|\!|\?|\.|\,]+)/;
+		my( $msg ) = $_ =~ /^([\w|\s|\'|\"|\!|\?|\.|\,]+)/;
 		next if(! $msg );
 		STDOUT->print($msg) or warn "$!\n";
 		

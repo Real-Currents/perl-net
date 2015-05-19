@@ -4,70 +4,106 @@ use strict;
 use warnings;
 
 # Start Perl process and restart for file changes in working directory
+use Cwd;
 use File::Monitor;
 use IO::Handle;
 
 my $pid;
-my $proc = shift;
+my $proc = shift or die "No Perl script to run\n";
 my @args = @ARGV;
-my $in = new IO::Handle;
-my $out = new IO::Handle;
+my $in;
+my $out;
+my $watcher = File::Monitor->new();
 
-pipe($in, $out);
+sub startDaemon();
+sub startProc();
+sub stopProc($);
+sub stopDaemon($);
+
+$SIG{INT} = \&stopDaemon;
+$SIG{TERM} = \&stopProc;
+
+startDaemon;
+
+sub startDaemon() {
+	$in = new IO::Handle;
+	$out = new IO::Handle;
+	
+	warn "Start watching...\n";
+	pipe($in, $out);
+	$watcher->watch( {
+		name        => getcwd,
+		recurse     => 1,
+		callback    => {
+			change => sub {
+				my ($name, $event, $change) = @_;
+				# Do stuff
+				stopProc 'TERM';
+			}
+		}
+	} );
+	$watcher->scan();
+	$pid = fork();
+
+	if( $pid == 0 ) {
+	# This is the child (forked) process
+		print "forked PID=". $$ ."\n";
+		close($in);
+		# Redirect STDOUT to $out
+		STDOUT->fdopen($out, '>');
+		startProc;
+	} else {
+	# This is the parent (daemon) process
+		print "daemon PID=". $$ ."\n";
+		close($out);
+		while ($in->opened) {
+			$_ = '';
+			my @changes = $watcher->scan();
+			
+			unless( defined @changes ) {
+				#$in->sysread($_,50,length($_));
+				STDOUT->print($. ."\n") if $.;
+				STDOUT->print($_ ."\n") if $_;
+				STDOUT->flush();
+			} else {
+				for (@changes) {
+					STDOUT->print($_->name, " has changed\n");
+				}
+				return startDaemon;
+			}
+		}
+	}
+}
 
 sub startProc() {
-	print $0 ."\n";
 	push(@ARGV, @args);
 	do $proc;
 }
 
-sub stopProc() {
+
+sub stopProc( $ ) {
 	my $sig = shift;
 	STDERR->print("Recieved $sig\n") if( $sig );
 	unless( defined $pid ){
 		STDERR->print("Child process has stopped\n\n");
 	} elsif( $pid == 0 ) {
 		&{$SIG{INT}}($sig);
-	}
-}
-
-sub startDaemon() {
-	warn "Start watching...\n";
-	$pid = fork();
-
-	if( $pid == 0 ) {
-	# This is the child (forked) process
-		print "forked PID=". $$ ."\n";
-		# Redirect STDOUT to $out
-		STDOUT->fdopen($out, '>');
-		close($in);
-		startProc;
 	} else {
-	# This is the parent (daemon) process
-		print "daemon PID=". $$ ."\n";
-		while (<$in>) {
-			STDOUT->print($. ."\n") if $.;
-			STDOUT->print($_ ."\n") if $_;
-			STDOUT->flush();
-		}
+		STDERR->print("Which process is this?\n\n");
+		kill $sig, $pid;
 	}
-	
-	return 1;
 }
 
-sub stopDaemon() { 
+sub stopDaemon( $ ) { 
 	if( $pid ) {
 		undef $pid;
-		stopProc;
+		stopProc shift;
 		warn "Stop watching.\n";
 		exit 2 or die "$!\n";
 	} else {
-		stopProc;
+		stopProc shift;
 		exit 2 or die "$!\n";
 	}
 }
 
-$SIG{INT} = \&stopDaemon;
-$SIG{TERM} = \&stopProc;
-
-startDaemon;
+1;
