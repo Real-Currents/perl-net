@@ -8,9 +8,9 @@ use warnings;
 # Checkout remote daytime servers @
 # http://tf.nist.gov/tf-cgi/servers.cgi
 
-use Socket;
+use Socket ('AF_INET', 'SOCK_STREAM', 'inet_aton', 'inet_ntoa', 'sockaddr_in');
 
-use constant DEFAULT_ADDR => '127.0.0.1';
+use constant DEFAULT_ADDR => 'time.nist.gov';
 use constant PORT => 13;
 use constant IPPROTO_TCP => 6;
 
@@ -61,12 +61,13 @@ print "Daytime client \
 # ($port, $packed_addr)= unpack_sockaddr_in $socket_addr
 
 my $protocol = getprotobyname('tcp') || IPPROTO_TCP;
+my $address = shift || DEFAULT_ADDR;
 
-while( my $address = shift ) {
-	my $packed_addr = inet_aton($address); #gethostbyname($address);	
+while( $address ) {
+	my $packed_addr = inet_aton($address); 		# Alternative to gethostbyname($address);	
 	unless( $packed_addr ) {
 		print "$address => ? \n\t";
-		$packed_addr = inet_aton(DEFAULT_ADDR); # Use localhost if IP cannot be resolved
+		$packed_addr = inet_aton(DEFAULT_ADDR); # If IP cannot be resolved use NIST servers
 		#next;
 	} else {
 		my $dotted_quad = inet_ntoa($packed_addr);
@@ -74,14 +75,17 @@ while( my $address = shift ) {
 	}
 	
 	my $socket;
-	socket($socket, AF_INET, SOCK_STREAM, $protocol) or 	# ($handle, $family, $type, $protocol_num)
+	socket($socket, AF_INET, SOCK_STREAM, $protocol) or # ($handle, $family, $type, $protocol_num)
 		print "Can't make socket: $!\n\n" and next;
 	
 	my $destination = sockaddr_in(PORT, $packed_addr);
-	connect($socket, $destination) or 						# ($handle, $socket_addr)
+	connect($socket, $destination) or 					# ($handle, $socket_addr)
 		print "Can't connect: $!\n\n" and next;
 
 	print <$socket>;
 	print "\n";
+	
+	$address = shift || ''; 	# Set address to next arg or quit
 }
+
 1;
