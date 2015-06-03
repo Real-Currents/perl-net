@@ -87,5 +87,3 @@ while( $address ) {
 	
 	$address = shift || ''; 	# Set address to next arg or quit
 }
-
-1;
