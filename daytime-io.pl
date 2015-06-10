@@ -14,7 +14,7 @@ print "Daytime client \
 ===============================================================\n";
 
 my $address = shift || 'time.nist.gov';
-my $lend = $/;
+my $lEnd = $/;
 $/ = CRLF;
 
 my $socket = IO::Socket::INET->new("$address:daytime") or
