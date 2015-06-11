@@ -11,7 +11,7 @@ use constant MY_ADDRESS => '127.0.0.1';
 my $socket = new IO::Handle;
 
 my( $bytes_out, 
-	$bytes_in) = (0, 0);
+	$bytes_in ) = (0, 0);
 
 my $port = shift || MY_ECHO_PORT;
 my $protocol = getprotobyname 'tcp';
