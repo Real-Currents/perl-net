@@ -41,22 +41,22 @@ while (1) {
 		$packed_client_addr ) = sockaddr_in $client_addr;
 	print "Connection from [". inet_ntoa($packed_client_addr) .", $port]\n";
 	
-	$session->print("Welcome to the echo server!\n\n") 
+	$session->print("Welcome to the echo server!$/") 
 		and $session->flush() or warn "$!\n";
 	
 	# Process client input here
 	while (<$session>) {
 		$bytes_in += length $_;
-		#chomp $_;
+		chomp $_;
 		my( $msg ) = $_ =~ /^([\w|\s|\'|\"|\!|\?|\.|\,]+)/;
 		next if(! $msg );
-		STDOUT->print($msg) or warn "$!\n";
+		STDOUT->print( $msg ."$/" ) or warn "$!\n";
 		
-		$session->print("You said: $msg \n\n") 
+		$session->print("You said: $msg $/") 
 			and $session->flush() or warn "$!\n";
 		$bytes_out += length $_;
 	}
-	print $session "Come back soon!\n\n";
+	print $session "Come back soon!$/";
 	
 	print "Connection from [". inet_ntoa($packed_client_addr) .", $port] closed\n";
 	close $session;

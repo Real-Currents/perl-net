@@ -12,6 +12,8 @@ my $host = shift || 'localhost';
 my $port = shift || 'echo';
 
 my $socket = IO::Socket::INET->new("$host:$port") or die $@;
+my $lEnd = $/;
+#$/ = "\n" or CRLF;
 
 # Print server's greeting
 my $msg_in = <$socket>;
@@ -22,13 +24,13 @@ while( defined(my $msg_out = STDIN->getline()) ) {
 	
 	my $msg_in = undef;
 	
-	while( defined($msg_in = <$socket>) ) {
+	while( defined($msg_in = <$socket>) and ($msg_in =~ /^\w+/) ) {
 		STDOUT->print( $msg_in );
 		last;
 	}
 	
 	$bytes_out += length($msg_out);
-	$bytes_in += length($msg_in);
+	$bytes_in += length($msg_in) if( defined($msg_in) );
 }
 
 $socket->close or warn $@;
