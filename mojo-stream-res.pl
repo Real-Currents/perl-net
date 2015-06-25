@@ -15,8 +15,8 @@ $tx->res->max_message_size(0);
 
 # Replace "read" events to disable default content parser
 $tx->res->content->unsubscribe('read')->on(read => sub {
-  my ($content, $bytes) = @_;
-  say "Streaming: $bytes";
+	my ($content, $bytes) = @_;
+	say "Streaming: $bytes";
 });
 
 # Process transaction
