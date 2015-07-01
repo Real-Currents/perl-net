@@ -13,6 +13,14 @@ $/ = CRLF;
 my( $bytes_out, 
 	$bytes_in ) = (0, 0);
 
+my $quit = 0;
+$SIG{INT} = sub {
+	my $sig = shift;
+	STDERR->print( "\nTerminated by $sig\n" );
+	STDERR->print( "\nbytes_sent: $bytes_out, bytes_recieved: $bytes_in\n\n" );
+	$quit++;
+};
+
 my $port = shift || MY_ECHO_PORT;
 my $protocol = getprotobyname 'tcp';
 
@@ -21,14 +29,6 @@ my $socket = IO::Socket::INET->new( 'LocalPort' => $port,
 									'Reuse'		=> 1,
 									'Timeout'	=> 60*60 ) 
 	or die "$!\n";
-
-my $quit = 0;
-$SIG{INT} = sub {
-	my $sig = shift;
-	STDERR->print( "\nTerminated by $sig\n" );
-	STDERR->print( "\nbytes_sent: $bytes_out, bytes_recieved: $bytes_in\n\n" );
-	$quit++;
-};
 
 #socket $socket, AF_INET, SOCK_STREAM, $protocol  or die "$!\n";
 
@@ -42,14 +42,18 @@ warn "Waiting for incoming connections on port $port...\n"; #if(
 #	) or die "$!\n";
 
 while (!$quit) {
-	#my $session = new IO::Handle;
+#	my $session = new IO::Handle;
+
 	next unless my $session = $socket->accept;
 #	next unless my $client_addr = accept $session, $socket ;
+
 	my $client_addr = gethostbyaddr($session->peeraddr, AF_INET)
 		or $session->peerhost;
+		
 	my $port = $session->peerport;
 #	my( $port,
 #		$packed_client_addr ) = sockaddr_in $client_addr;
+
 	print "Connection from [$client_addr, $port]\n";
 	
 	$session->print("Welcome to the echo server!$/") 
