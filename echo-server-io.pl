@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use IO::Handle;
-use IO::Socket ('AF_INET', ':crlf');
+use IO::Socket ('CRLF', 'AF_INET');
 use constant MY_ECHO_PORT => 3000;
 use constant MY_ADDRESS => '127.0.0.1';
 
@@ -25,9 +25,9 @@ my $port = shift || MY_ECHO_PORT;
 my $protocol = getprotobyname 'tcp';
 
 my $socket = IO::Socket::INET->new( 'LocalPort' => $port,
-									'Listen' => 20,
+									'Listen' 	=> 20,
 									'Reuse'		=> 1,
-									'Timeout'	=> 60*60 ) 
+									'Timeout' 	=> 60*60 ) 
 	or die "$!\n";
 
 #socket $socket, AF_INET, SOCK_STREAM, $protocol  or die "$!\n";
@@ -41,7 +41,7 @@ warn "Waiting for incoming connections on port $port...\n"; #if(
 #		listen($socket, SOMAXCONN) 
 #	) or die "$!\n";
 
-while (!$quit) {
+while(! $quit ) {
 #	my $session = new IO::Handle;
 
 	next unless my $session = $socket->accept;
@@ -60,7 +60,7 @@ while (!$quit) {
 		and $session->flush() or warn "$!\n";
 	
 	# Process client input here
-	while (<$session>) {
+	while( <$session> ) {
 		$bytes_in += length $_;
 		chomp $_;
 		my( $msg ) = $_ =~ /^([\w|\s|\'|\"|\!|\?|\.|\,]+)/;

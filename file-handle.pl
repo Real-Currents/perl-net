@@ -10,8 +10,8 @@ my $file = shift;
 my $counter = 0;
 my $fh = IO::File->new($file) or Debugger::error $!;
 
-while (defined(my $line = $fh->getline)) {
+while( defined(my $line = $fh->getline) ) {
 	$counter++;
 }
-STDOUT->print("Counted $counter");
+STDOUT->print("Counted $counter\n");
 close $fh or Debugger::error($!);

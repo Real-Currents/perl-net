@@ -34,7 +34,7 @@ warn "Waiting for incoming connections on port $port...\n" if(
 		listen($socket, SOMAXCONN) 
 	) or die "$!\n";
 
-while (1) {
+while( 1 ) {
 	my $session = new IO::Handle;
 	next unless my $client_addr = accept $session, $socket ;
 	my( $port,
@@ -45,7 +45,7 @@ while (1) {
 		and $session->flush() or warn "$!\n";
 	
 	# Process client input here
-	while (<$session>) {
+	while( <$session> ) {
 		$bytes_in += length $_;
 		chomp $_;
 		my( $msg ) = $_ =~ /^([\w|\s|\'|\"|\!|\?|\.|\,]+)/;
