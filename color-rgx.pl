@@ -8,7 +8,7 @@ use Term::ANSIColor ':constants';
 my %target = ();
 my ($arg, $clr);
 my @presets = ( '\d+\.\d+\.\d+\.\d+', GREEN,
-				'[A-Za-z]+', YELLOW );
+				'[A-Za-z]+\d+', YELLOW );
 my @colors = ( @presets, @ARGV );
 while( @ARGV > 0 ) {
 	push(@colors, shift);
