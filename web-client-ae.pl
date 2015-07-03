@@ -7,9 +7,7 @@ use warnings;
 # http://perlmaven.com/fetching-several-web-pages-in-parallel-using-anyevent
 use AnyEvent;
 use AnyEvent::HTTP;
-use IO::Socket (':DEFAULT', ':crlf'); # Tag :crlf imports CRLF and $CRLF
 
-$/ = CRLF . CRLF;
 my $cv = AnyEvent->condvar;
 my @urls = @ARGV or die "Usage: web-client-io.pl <URL>\n";
 
@@ -17,34 +15,25 @@ my $data;
 for( @urls ) {
 	my $url = shift or die "Usage: web-client-io.pl <URL>\n";	
 	say "Start $url\n";
-#	$cv->begin;
-#	http_get $url, sub {
-#		my ($html) = @_;
-#		say "$url received, Size: ", length $html;
-#		$cv->end;
-#	};
-
+	
 	my( $host, $path ) = $url =~ /(?:^http:\/\/)?([^\/]+)(\/[^\#]*)?/;
 	$path = "/" if(! $path );
+	
+	$cv->begin;
+	http_get "http://$host$path", sub {
+		$data = \@_;
+		say "$url received, Size: ", length($data->[0]);
 
-	my $socket = IO::Socket::INET->new( 'PeerAddr' 	=> $host,
-										'PeerPort' 	=> 'http(80)' )
-		or die "$!\n";
+		my $header = $data->[1];
+		print "$_: ". $header->{$_} ."\n" for( keys %$header );
 
-	$socket->print( "GET $path HTTP/1.0" 	=> CRLF,		# Initial Request line
-					"Host: $host" 			=> CRLF, CRLF ); # Header lines and end Request
+#		print $data->[0];
 
-	my $header = $socket->getline;
-	$header =~ s/$CRLF/\n/g;  # Replace CRLF with \n 
-	STDOUT->print($header);
-
-#	STDOUT->print($data) while( $socket->read($data, 1024) > 0 );
-
-	$socket->close();
-	$data = undef;
-	print "\n";
+		$data = undef;
+		print "\n";
+		$cv->end;
+	};
 } 
 
-#say 'Before the event-loop';
-#$cv->recv;
+$cv->recv;
 say 'Finish';
