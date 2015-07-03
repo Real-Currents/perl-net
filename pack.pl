@@ -14,14 +14,14 @@ my( $a, $b, $c, $d ) = split /\./, $ip;
 my $i = 0;
 print map { 
 		$i++;
-		"byte ". $i .": ". $_ ."\n";		# Map returns the last statement in the block to print
+		"byte ". $i .": ". $_ ."\n";			# Map returns the last statement in the block to print
 	} ($a, $b, $c, $d);
 
-$packed = pack 'C4', $a, $b, $c, $d;		# Pack as 4 unsiged bytes
-print "packed: ". unpack('H*', $packed) ."\n";			# Print hexadecimal representation of $packed
+$packed = pack 'C4', $a, $b, $c, $d;			# Pack as 4 unsiged bytes
+print "packed: ". unpack('H*', $packed) ."\n";	# Print hexadecimal representation of $packed
 
-$packed = pack 'C*', $a, $b, $c, $d;		# Pack as many unsiged bytes as needed
-print "packed: ". unpack('H*', $packed) ."\n";			# Print hexadecimal representation of $packed
+$packed = pack 'C*', $a, $b, $c, $d;			# Pack as many unsiged bytes as needed
+print "packed: ". unpack('H*', $packed) ."\n";	# Print hexadecimal representation of $packed
 
 ( $a, $b, $c, $d ) = unpack 'C4', $packed;
 print "unpacked by inet_ntoa: ". inet_ntoa($packed) ."\n\n";
