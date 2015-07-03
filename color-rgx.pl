@@ -9,7 +9,10 @@ my %target = ();
 my ($arg, $clr);
 my @presets = ( '\d+\.\d+\.\d+\.\d+', GREEN,
 				'[A-Za-z]+', YELLOW );
-my @colors = (@ARGV);
+my @colors = ( @presets, @ARGV );
+while( @ARGV > 0 ) {
+	push(@colors, shift);
+}
 
 #unless( @ARGV > 0 ) {
 #	print "Usage: color-rgx.pl [regex] [color], [regex] [color], ...\n";
@@ -22,7 +25,7 @@ while( $arg = shift(@colors) ) {
 
 	print "$arg => $clr\n";
 	
-	$target{$arg} = eval($clr);
+	$target{$arg} = $clr;
 }
 
 my $rst = RESET;
