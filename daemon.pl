@@ -60,7 +60,7 @@ sub startDaemon() {
 	# This is the parent (daemon) process
 		print "daemon PID=". $$ ."\n";
 		close($out);
-		while ($in->opened) {
+		while( $in->opened ) {
 			$_ = '';
 			my @changes = $watcher->scan();
 			
