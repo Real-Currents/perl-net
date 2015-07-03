@@ -9,7 +9,7 @@ my %target = ();
 my ($arg, $clr);
 my @presets = ( '\d+\.\d+\.\d+\.\d+', GREEN,
 				'[A-Za-z]+', YELLOW );
-my @colors = (@presets, @ARGV);
+my @colors = (@ARGV);
 
 #unless( @ARGV > 0 ) {
 #	print "Usage: color-rgx.pl [regex] [color], [regex] [color], ...\n";
