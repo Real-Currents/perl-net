@@ -13,10 +13,11 @@ print "Child process started...\n" if( $child > 0 );
 if(! $child ) {
 	# Now in child process
 	print "forked PID=". $$ ."\n";
-	exec( 'ls', '-1');
+	local *STDOUT;
+#	return exec( 'ls', '-1');
 }
 
 # Still in parent process;
 print "daemon PID=". $$ ."\n";
 
-while(<>) {} # Will exit on Interrupt, Terminate or Kill
+while( sleep(1) ) {} # Will exit on Interrupt, Terminate or Kill
