@@ -27,7 +27,7 @@ for( @urls ) {
 	$header =~ s/$CRLF/\n/g;  # Replace CRLF with \n 
 	STDOUT->print($header);
 
-#	STDOUT->print($data) while( $socket->read($data, 1024) > 0 );
+	STDOUT->print($data) while( $socket->read($data, 1024) > 0 );
 
 	$socket->close();
 	$data = undef;
