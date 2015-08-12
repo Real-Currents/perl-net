@@ -10,6 +10,10 @@ use AnyEvent::Strict;
 my $fh = \*STDIN;
 my $loops = 0;
 my $name;
+
+$| = 1;
+STDOUT->print("Enter you name> ");
+
 sub GetName() {
 	my $input = $fh->getline();
 	$name = $input if( $input =~ /\w+/ ); 
@@ -17,9 +21,6 @@ sub GetName() {
 		STDOUT->print("Enter you name> ");
 	}
 }
-$| = 1;
-STDOUT->print("Enter you name> ");
-
 sub MakeCounter {
 	my $cv = AnyEvent->condvar;
 	return $cv, AnyEvent->timer (
