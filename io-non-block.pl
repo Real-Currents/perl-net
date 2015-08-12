@@ -11,8 +11,10 @@ my $fh = \*STDIN;
 my $loops = 0;
 my $name;
 sub GetName() {
+	my $input = $fh->getline();
+	$name = $input if( $input =~ /\w+/ ); 
 	unless( $name ) {
-		$name = $fh->getline(); 
+		STDOUT->print("Enter you name> ");
 	}
 }
 $| = 1;
@@ -21,7 +23,7 @@ STDOUT->print("Enter you name> ");
 sub MakeCounter {
 	my $cv = AnyEvent->condvar;
 	return $cv, AnyEvent->timer (
-	  after => 1, 	# Non-blocking sleep for 1 second
+	  after => 0.033, 	# Non-blocking sleep 30 times per second
 	  cb => sub {
 			$cv->send;
 		}
@@ -38,12 +40,11 @@ my $aeWatcher = AnyEvent->io(
 	}
 );
 
-while(! $name ) {	
-	#GetName; # Blocking call
+while(! $name ) {				# Main Event Loop
 	$loops++;
-	$aeCounter[0]->recv;
-	@aeCounter = MakeCounter; 	# Half-blocking: Waits for timeout BUT...
-								# Will ALSO read other events like I\O via $aeWatcher
+	#GetName; 					# Blocking call
+	$aeCounter[0]->recv; 		# Half-blocking: Waits for timeout BUT...
+	@aeCounter = MakeCounter; 	# Will ALSO read other events like I\O via $aeWatcher
 }
 	
 STDOUT->print("After $loops event loops your name is $name \n") if( $name );

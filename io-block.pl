@@ -9,17 +9,19 @@ my $fh = \*STDIN;
 my $loops = 0;
 my $name;
 sub GetName() {
+	my $input = $fh->getline();
+	$name = $input if( $input =~ /\w+/ ); 
 	unless( $name ) {
-		$name = $fh->getline(); 
+		STDOUT->print("Enter you name> ");
 	}
 }
 $| = 1;
 STDOUT->print("Enter you name> ");
 
-while(! $name ) {	
-	GetName; # Blocking call
+while(! $name ) { 	# Main Event Loop
 	$loops++;
-	sleep(1); # Full-blocking: only exception is %SIG
+	GetName; 		# Blocking call
+	sleep(0.033); 	# Full-blocking: only exception is %SIG
 }
 	
 STDOUT->print("After $loops event loops your name is $name \n") if( $name );
