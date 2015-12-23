@@ -22,30 +22,32 @@ sub GetName() {
 	}
 }
 sub MakeCounter {
-	my $cv = AnyEvent->condvar;
-	return $cv, AnyEvent->timer (
-	  after => 0.033, 	# Non-blocking sleep 30 times per second
-	  cb => sub {
-			$cv->send;
-		}
-	)
+	my $condvar = AnyEvent->condvar;
+	return {
+		'cv' => $condvar, 
+		'ticker' => AnyEvent->timer(
+		  after => 0.033, 			# Non-blocking sleep 30 times per second
+		  cb => sub {
+				$condvar->send;
+			}
+		)
+	}
 };
 
-my @aeCounter = MakeCounter;
+my $aeCounter = MakeCounter;
 my $aeWatcher = AnyEvent->io(
 	fh => $fh,
 	poll => "r",
 	cb => sub {
-		GetName;
-		$aeCounter[0]->send;
+		GetName; 				# Blocking call nested in async callback
+		$aeCounter->{cv}->send;
 	}
 );
 
-while(! $name ) {				# Main Event Loop
+while(! $name ) { 				# Main Event Loop
 	$loops++;
-	#GetName; 					# Blocking call
-	$aeCounter[0]->recv; 		# Half-blocking: Waits for timeout BUT...
-	@aeCounter = MakeCounter; 	# Will ALSO read other events like I\O via $aeWatcher
+	$aeCounter->{cv}->recv; 	# Half-blocking: Waits for timeout BUT...
+	$aeCounter = MakeCounter; 	# Will ALSO read other events like I\O via $aeWatcher
 }
 	
 STDOUT->print("After $loops event loops your name is $name \n") if( $name );
