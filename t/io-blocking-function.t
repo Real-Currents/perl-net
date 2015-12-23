@@ -9,12 +9,20 @@ use Fcntl;
 use IO::Handle;
 
 # Create handle to mock STDIN input
-my $stdin;
-open $stdin, '<', \"John";
-
-local *STDIN = $stdin unless(-p STDIN );
+my( $input, 
+    $stdin ) = (
+        (-p STDIN )? STDIN->getline() : "John",
+        new IO::Handle()
+    );
+local *STDIN = $stdin;
+#open $stdin, '<', \$input;
 #print "Input: ". STDIN->getline() ."\n";
+
+open $stdin, '<', \$input;
 require_ok('io-blocking-function.pl');
+
+open $stdin, '<', \$input;
+ok(perl::net::GetName() eq $input, "GetName should return ". $input );
 
 close $stdin;
 

@@ -13,14 +13,14 @@ $| = 1;
 STDOUT->print("Enter you name> ");
 
 {   package perl::net;
-    use Exporter ('import');
-    our @EXPORT_OK = ('GetName');
 
     sub GetName() {
         my $input = $fh->getline();
         $name = $input if( $input =~ /\w+/ ); 
         unless( $name ) {
             STDOUT->print("Enter you name> ");
+        } else {
+            return $name;
         }
     }
     

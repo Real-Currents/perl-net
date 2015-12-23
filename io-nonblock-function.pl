@@ -14,8 +14,6 @@ $| = 1;
 STDOUT->print("Enter you name> ");
 
 {   package perl::net;
-    use Exporter ('import');
-    our @EXPORT_OK = ('GetName');
 
     sub GetName() {
         my $input = $fh->getline();
