@@ -13,33 +13,41 @@ my $name;
 $| = 1;
 STDOUT->print("Enter you name> ");
 
-sub GetName() {
-    my $input = $fh->getline();
-    $name = $input if( $input =~ /\w+/ ); 
-    unless( $name ) {
-        STDOUT->print("Enter you name> ");
-    }
-}
-sub MakeCounter {
-    my $condvar = AE::cv;
-    return {
-        'cv' => $condvar, 
-        'ticker' => AE::timer(
-            0.033, 				# Non-blocking sleep 30 times per second
-            0,
-            sub {
-                $condvar->send;
-            }
-        )
-    }
-};
+{   package perl::net;
+    use Exporter ('import');
+    our @EXPORT_OK = ('GetName');
 
-my $aeCounter = MakeCounter;
+    sub GetName() {
+        my $input = $fh->getline();
+        $name = $input if( $input =~ /\w+/ ); 
+        unless( $name ) {
+            STDOUT->print("Enter you name> ");
+        }
+    }
+    
+    sub MakeCounter {
+        my $condvar = AE::cv;
+        return {
+            'cv' => $condvar, 
+            'ticker' => AE::timer(
+                0.033, 				# Non-blocking sleep 30 times per second
+                0,
+                sub {
+                    $condvar->send;
+                }
+            )
+        }
+    }
+    
+    1;
+}
+
+my $aeCounter = perl::net::MakeCounter;
 my $aeWatcher = AE::io(
     $fh,
     0, 							# $watch_write == false
     sub {
-        GetName; 				# Blocking call nested in async callback
+        perl::net::GetName; 				# Blocking call nested in async callback
         $aeCounter->{cv}->send;
     }
 );
@@ -47,9 +55,9 @@ my $aeWatcher = AE::io(
 while(! $name ) { 				# Main Event Loop
     $loops++;
     $aeCounter->{cv}->recv; 	# Half-blocking: Waits for timeout BUT...
-    $aeCounter = MakeCounter; 	# Will ALSO read other events like I\O via $aeWatcher
+    $aeCounter = perl::net::MakeCounter; 	# Will ALSO read other events like I\O via $aeWatcher
 }
 
 STDOUT->print("After $loops event loops your name is $name \n") if( $name );
 
-exit;
+1;
