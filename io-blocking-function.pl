@@ -27,10 +27,10 @@ STDOUT->print("Enter you name> ");
     1;
 }
 
-while(! $name ) { 	# Main Event Loop
+while(! $name ) {                           # Main Event Loop
     $loops++;
-    perl::net::GetName;        # Blocking call
-    sleep(0.033);   # Full-blocking: only exception is %SIG
+    perl::net::GetName;                     # Blocking call
+    sleep(0.033);                           # Full-blocking: only exception is %SIG
 }
 
 STDOUT->print("After $loops event loops your name is $name \n") if( $name );

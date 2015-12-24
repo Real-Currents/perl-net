@@ -7,7 +7,7 @@ use IO::Handle;
 use AnyEvent;
 use AnyEvent::Strict;
 
-my $fh = \*STDIN;
+my $fh;
 my $loops = 0;
 my $name;
 
@@ -42,18 +42,18 @@ STDOUT->print("Enter you name> ");
 
 my $aeCounter = perl::net::MakeCounter;
 my $aeWatcher = AnyEvent->io(
-    fh => $fh,
+    fh => ($fh = \*STDIN),
     poll => "r",
     cb => sub {
         perl::net::GetName; 				# Blocking call nested in async callback
-        $aeCounter->{cv}->send;
+        $aeCounter->{cv}->send;             # Interrupts $aeCounter timeout
     }
 );
 
-while(! $name ) { 				# Main Event Loop
+while(! $name ) {                           # Main Event Loop
     $loops++;
-    $aeCounter->{cv}->recv; 	# Half-blocking: Waits for timeout BUT...
-    $aeCounter = perl::net::MakeCounter; 	# Will ALSO read other events like I\O via $aeWatcher
+    $aeCounter->{cv}->recv;                 # Half-blocking: Waits for timeout BUT...
+    $aeCounter = perl::net::MakeCounter;    # Will ALSO read other events like I\O via $aeWatcher
 }
 
 STDOUT->print("After $loops event loops your name is $name \n") if( $name );
