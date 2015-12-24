@@ -26,7 +26,7 @@ ok($aeTimer, "should create timer with AE");
 describe 'A non-blocking io function' =>  sub {
     it "should allow native thread to concurrently process executable code" => sub {
         open $stdin, '<', \$input;
-        require_ok('io-nonblock-function.pl');
+        require_ok('io-nonblock-method.pl');
     };
 };
 
